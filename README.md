@@ -42,3 +42,28 @@ Ensure you have **Python 3.8+** installed on your system.
 git clone [https://github.com/Amey543/Empathy-engine.git](https://github.com/Amey543/Empathy-engine.git)
 cd Empathy-engine
 ```
+### 3. Set up the Configuration
+Add the correct path to generated_Audio in config.yaml
+
+### 4. Create a Virtual Environment
+windows:
+```bash
+python -m venv .venv
+.venv\Scripts\activate
+```
+macOS/Linux: 
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+### 5. Install Dependencies
+```bash
+pip install -r backend/requirements.txt
+```
+### 6. Start the Server
+```bash
+uvicorn backend.main:app --reload
+```
+### 7. Experience the Engine
+Open your browser and navigate to:
+👉 https://www.google.com/search?q=http://127.0.0.1:8000
