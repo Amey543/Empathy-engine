@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Empathy Engine</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 16px;
+            resize: none;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s;
+            width: 100%;
+        }
+        button:hover { background-color: #0056b3; }
+        button:disabled { background-color: #a0c4ff; cursor: not-allowed; }
+        
+        .result {
+            margin-top: 20px;
+            display: none;
+        }
+        .emotion-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        audio { width: 100%; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>The Empathy Engine</h2>
+    <p>Type a sentence to hear its emotional delivery.</p>
+    
+    <textarea id="inputText" placeholder="e.g., I am absolutely thrilled about this!"></textarea>
+    <button id="generateBtn" onclick="processText()">Generate Audio</button>
+
+    <div class="result" id="resultContainer">
+        <div id="emotionDisplay" class="emotion-badge"></div>
+        <audio id="audioPlayer" controls></audio>
+    </div>
+</div>
+
+<script>
+    async function processText() {
+        const textInput = document.getElementById('inputText').value;
+        const btn = document.getElementById('generateBtn');
+        const resultContainer = document.getElementById('resultContainer');
+        const emotionDisplay = document.getElementById('emotionDisplay');
+        const audioPlayer = document.getElementById('audioPlayer');
+
+        if (!textInput.trim()) return alert("Please enter some text!");
+
+        // UI Loading State
+        btn.innerText = "Processing...";
+        btn.disabled = true;
+        resultContainer.style.display = "none";
+
+        try {
+            const response = await fetch('/process', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: textInput })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                // Update UI with results
+                emotionDisplay.innerText = `Detected Emotion: ${data.emotion}`;
+                
+                // Color code the badge
+                if(data.emotion === "Positive") emotionDisplay.style.backgroundColor = "#d4edda";
+                else if(data.emotion === "Negative") emotionDisplay.style.backgroundColor = "#f8d7da";
+                else emotionDisplay.style.backgroundColor = "#e2e3e5";
+
+                audioPlayer.src = data.audio_url;
+                resultContainer.style.display = "block";
+                audioPlayer.play(); // Auto-play the result
+            } else {
+                alert("Error: " + data.detail);
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            alert("Failed to connect to the server.");
+        } finally {
+            // Reset UI State
+            btn.innerText = "Generate Audio";
+            btn.disabled = false;
+        }
+    }
+</script>
+
+</body>
+</html>
